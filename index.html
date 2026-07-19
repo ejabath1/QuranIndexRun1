@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AyaatMap — Global Quranic Word Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0E2A2E;
+    --ink-deep: #081A1D;
+    --gold: #C89B3C;
+    --gold-soft: #E4C77E;
+    --parchment: #FBF3E3;
+    --parchment-dim: #F1E6CE;
+    --line: rgba(200,155,60,0.35);
+    --ok: #5C8A6A;
+    --pending: #B5652F;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #123539 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #0E3236 0%, transparent 55%),
+      var(--ink);
+    color: var(--parchment);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+  }
+  .frame{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  header.hero{
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 32px;
+    margin-bottom: 36px;
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-bottom: 14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width: 22px; height:1px; background: var(--gold);
+    display:inline-block;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.05;
+    margin: 0 0 14px;
+    color: var(--parchment);
+  }
+  h1 em{ font-style: italic; color: var(--gold-soft); }
+  .lede{
+    font-size: 16px;
+    line-height: 1.6;
+    color: rgba(251,243,227,0.75);
+    max-width: 640px;
+  }
+  .pipeline{
+    display:flex; flex-wrap:wrap; gap: 10px;
+    margin-top: 22px;
+    font-size: 12.5px;
+  }
+  .pipeline span{
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: 999px;
+    color: var(--gold-soft);
+    background: rgba(200,155,60,0.06);
+  }
+  .pipeline .arrow{ border:none; background:none; padding:6px 2px; color: var(--gold); }
+
+  .search-panel{
+    background: rgba(251,243,227,0.03);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 30px;
+  }
+  .search-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  select, input[type=text]{
+    background: var(--ink-deep);
+    border: 1px solid var(--line);
+    color: var(--parchment);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-family:'Inter';
+    font-size:14px;
+  }
+  select:focus, input:focus{ outline: 2px solid var(--gold-soft); outline-offset: 1px; }
+  #conceptSelect{ flex: 1 1 260px; }
+  #langSelect{ flex: 0 0 200px; }
+  button.go{
+    background: var(--gold);
+    color: var(--ink-deep);
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform .12s ease, background .12s ease;
+  }
+  button.go:hover{ background: var(--gold-soft); }
+  button.go:active{ transform: scale(.98); }
+  button.go:disabled{ opacity:.5; cursor: progress; }
+
+  .concept-meta{
+    margin-top: 16px;
+    font-size: 13px;
+    color: rgba(251,243,227,0.6);
+    display:flex; gap: 18px; flex-wrap: wrap;
+  }
+  .concept-meta b{ color: var(--gold-soft); font-weight:600; }
+
+  .results{ display:flex; flex-direction:column; gap: 18px; }
+
+  .card{
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, rgba(251,243,227,0.035), rgba(251,243,227,0.015));
+    padding: 22px;
+    position: relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; width:3px; height:100%;
+    background: var(--gold);
+    opacity:.6;
+  }
+  .ref{
+    font-family:'Fraunces', serif;
+    font-size: 13px;
+    letter-spacing:.06em;
+    color: var(--gold-soft);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .arabic{
+    font-family:'Amiri', serif;
+    direction: rtl;
+    font-size: 26px;
+    line-height: 1.9;
+    color: var(--parchment);
+    margin-bottom: 16px;
+    padding: 14px 18px;
+    background: rgba(8,26,29,0.4);
+    border-radius: 8px;
+    border: 1px solid rgba(200,155,60,0.18);
+  }
+  .stage{
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+  }
+  .stage-label{
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(228,199,126,0.8);
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 6px;
+  }
+  .badge{
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: .04em;
+    text-transform: none;
+  }
+  .badge.live{ background: rgba(92,138,106,0.18); color:#9FCBA9; border:1px solid rgba(92,138,106,0.4); }
+  .badge.pending{ background: rgba(181,101,47,0.18); color:#E3A874; border:1px solid rgba(181,101,47,0.4); }
+  .stage-text{ font-size: 14.5px; line-height:1.65; color: rgba(251,243,227,0.88); }
+  .stage-text.dim{ color: rgba(251,243,227,0.55); font-style: italic; }
+  .source-tag{ font-size: 11px; color: rgba(251,243,227,0.4); margin-top:6px; }
+
+  .skeleton{ color: rgba(251,243,227,0.4); font-size:13px; }
+  .footer-note{
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    line-height:1.7;
+    color: rgba(251,243,227,0.5);
+  }
+  .footer-note a{ color: var(--gold-soft); }
+  @media (max-width: 560px){
+    .arabic{ font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header class="hero">
+    <div class="eyebrow">AyaatMap · Prototype v0.1 · Live-sourced</div>
+    <h1>Every concept,<br><em>traced to its verse.</em></h1>
+    <p class="lede">A working proof-of-concept for the Global Quranic Concordance Platform. Pick a concept below — the app fetches the Arabic ayah and a classical tafsir live from open Quran/Tafsir APIs, then drafts a translation <em>from the tafsir's meaning</em>, not from an existing translation.</p>
+    <div class="pipeline">
+      <span>1 · Concept</span><span class="arrow">→</span>
+      <span>2 · Ayah (live, Uthmani script)</span><span class="arrow">→</span>
+      <span>3 · Tafsir (live, classical source)</span><span class="arrow">→</span>
+      <span>4 · Draft translation of the tafsir</span><span class="arrow">→</span>
+      <span>5 · Scholar review (pending)</span>
+    </div>
+  </header>
+
+  <section class="search-panel">
+    <div class="search-row">
+      <select id="conceptSelect"></select>
+      <select id="langSelect">
+        <option value="ml">Malayalam (ml)</option>
+        <option value="en" selected>English (en)</option>
+        <option value="ur">Urdu (ur)</option>
+        <option value="id">Indonesian (id)</option>
+        <option value="tr">Turkish (tr)</option>
+        <option value="fr">French (fr)</option>
+      </select>
+      <button class="go" id="goBtn">Trace this concept</button>
+    </div>
+    <div class="concept-meta" id="conceptMeta"></div>
+  </section>
+
+  <section class="results" id="results"></section>
+
+  <div class="footer-note">
+    Data sourcing, live at request time: Arabic text via <a href="https://alquran.cloud/api" target="_blank" rel="noopener">api.alquran.cloud</a> (Uthmani script) ·
+    Tafsir via <a href="https://github.com/spa5k/tafsir_api" target="_blank" rel="noopener">spa5k/tafsir_api</a> (Tafsir Ibn Kathir, abridged English) ·
+    Draft translation via <a href="https://mymemory.translated.net/" target="_blank" rel="noopener">MyMemory Translation Memory</a>.
+    Concept-to-ayah mappings in <code>data/concepts.json</code> are the seed of your father's original index — this prototype ships with 5 sample concepts; the production build migrates the full Malayalam original.
+    Nothing here is theologically final: every card marked <span class="badge pending">pending review</span> is a machine draft awaiting a scholar, by design.
+  </div>
+</div>
+
+<script>
+const ARABIC_EDITION = "quran-uthmani";
+const TAFSIR_SLUG = "en-tafisr-ibn-kathir"; // spa5k/tafsir_api slug for Ibn Kathir (abridged, English)
+const conceptSelect = document.getElementById('conceptSelect');
+const langSelect = document.getElementById('langSelect');
+const goBtn = document.getElementById('goBtn');
+const resultsEl = document.getElementById('results');
+const conceptMetaEl = document.getElementById('conceptMeta');
+
+let CONCEPTS = [];
+
+async function loadConcepts(){
+  try{
+    const res = await fetch('data/concepts.json');
+    CONCEPTS = await res.json();
+  }catch(e){
+    resultsEl.innerHTML = `<div class="card"><div class="stage-text">Could not load data/concepts.json — make sure you're serving this folder (not opening index.html directly from disk) so the relative fetch works. On GitHub Pages this resolves automatically.</div></div>`;
+    return;
+  }
+  conceptSelect.innerHTML = CONCEPTS.map(c =>
+    `<option value="${c.id}">${c.canonical_name} — ${c.malayalam_name}</option>`
+  ).join('');
+  updateMeta();
+}
+conceptSelect.addEventListener('change', updateMeta);
+
+function updateMeta(){
+  const c = CONCEPTS.find(x => x.id === conceptSelect.value);
+  if(!c) return;
+  conceptMetaEl.innerHTML =
+    `<span><b>Root</b> ${c.arabic_root}</span>` +
+    `<span><b>Category</b> ${c.category}</span>` +
+    `<span><b>Occurrences in this demo</b> ${c.occurrences.length}</span>`;
+}
+
+async function fetchArabic(surah, ayah){
+  const r = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/${ARABIC_EDITION}`);
+  if(!r.ok) throw new Error('ayah fetch failed');
+  const j = await r.json();
+  return j.data.text;
+}
+
+async function fetchTafsir(surah, ayah){
+  const r = await fetch(`https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/${TAFSIR_SLUG}/${surah}/${ayah}.json`);
+  if(!r.ok) throw new Error('tafsir fetch failed');
+  const j = await r.json();
+  return (j.text || '').replace(/<[^>]+>/g, '').trim();
+}
+
+async function draftTranslate(text, targetLang){
+  if(targetLang === 'en') return text; // tafsir source is already English
+  const snippet = text.slice(0, 480); // MyMemory has a per-request length limit
+  const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(snippet)}&langpair=en|${targetLang}`);
+  if(!r.ok) throw new Error('translation fetch failed');
+  const j = await r.json();
+  return j.responseData && j.responseData.translatedText ? j.responseData.translatedText : null;
+}
+
+function cardSkeleton(surah, ayah){
+  return `
+    <div class="card" id="card-${surah}-${ayah}">
+      <div class="ref">Surah ${surah} : Ayah ${ayah}</div>
+      <div class="skeleton">Fetching live from api.alquran.cloud…</div>
+    </div>`;
+}
+
+async function renderOccurrence(surah, ayah){
+  const el = document.getElementById(`card-${surah}-${ayah}`);
+  try{
+    const arabic = await fetchArabic(surah, ayah);
+    let tafsir = null, tafsirErr = false;
+    try{ tafsir = await fetchTafsir(surah, ayah); }
+    catch(e){ tafsirErr = true; }
+
+    const lang = langSelect.value;
+    let draft = null, draftErr = false;
+    if(tafsir){
+      try{ draft = await draftTranslate(tafsir, lang); }
+      catch(e){ draftErr = true; }
+    }
+
+    el.innerHTML = `
+      <div class="ref">Surah ${surah} : Ayah ${ayah}</div>
+      <div class="arabic">${arabic}</div>
+
+      <div class="stage">
+        <div class="stage-label">Step 3 — Tafsir (Ibn Kathir, abridged)
+          <span class="badge live">live fetch</span>
+        </div>
+        <div class="stage-text">${tafsirErr || !tafsir ? 'Tafsir not available for this ayah in the current source — falling back to translation-only display.' : tafsir}</div>
+        <div class="source-tag">source: spa5k/tafsir_api → Tafsir Ibn Kathir</div>
+      </div>
+
+      <div class="stage">
+        <div class="stage-label">Step 4 — Draft translation, derived from the tafsir above (${lang})
+          <span class="badge pending">pending scholar review</span>
+        </div>
+        <div class="stage-text ${draft ? '' : 'dim'}">${
+          lang === 'en' ? 'Target language is English — the tafsir text above is the working excerpt.'
+          : draftErr ? 'Live translation draft unavailable right now (rate limit or network) — try again shortly.'
+          : draft ? draft
+          : 'No tafsir was available to translate for this ayah.'
+        }</div>
+        <div class="source-tag">draft engine: MyMemory Translation Memory — not a substitute for a qualified translator</div>
+      </div>
+    `;
+  }catch(e){
+    el.innerHTML = `
+      <div class="ref">Surah ${surah} : Ayah ${ayah}</div>
+      <div class="stage-text dim">Could not reach the live Quran API just now. This is a network hiccup, not a data problem — try again.</div>
+    `;
+  }
+}
+
+async function run(){
+  const c = CONCEPTS.find(x => x.id === conceptSelect.value);
+  if(!c) return;
+  goBtn.disabled = true;
+  goBtn.textContent = 'Tracing…';
+  resultsEl.innerHTML = c.occurrences.map(o => cardSkeleton(o.surah, o.ayah)).join('');
+  for(const o of c.occurrences){
+    await renderOccurrence(o.surah, o.ayah);
+  }
+  goBtn.disabled = false;
+  goBtn.textContent = 'Trace this concept';
+}
+
+goBtn.addEventListener('click', run);
+loadConcepts();
+</script>
+</body>
+</html>
