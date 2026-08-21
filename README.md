@@ -1,4 +1,4 @@
-# AyaatMap — Working Prototype (v0.1)
+# Quran Index — Working Prototype (v0.1)
 
 This is a live, deployable proof-of-concept for the Global Quranic Concordance Platform described in the project charter. It is intentionally small — 5 sample concepts — so you can test the core idea (and show it to your father and advisors) before committing to the full build.
 
