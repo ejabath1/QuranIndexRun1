@@ -26,10 +26,11 @@ python3 -m http.server 8000
 
 ## Deploy to GitHub Pages (5 minutes)
 
-1. Create a new repo, e.g. `ayaatmap`.
-2. Push these two files/folders to the repo root: `index.html`, `data/concepts.json`, `README.md`.
-3. In the repo: **Settings → Pages → Source → Deploy from a branch → main → / (root)**.
-4. Your prototype will be live at `https://<your-username>.github.io/ayaatmap/` within a minute or two.
+Clone the existing repository that contains the project.
+Copy/replace these files/folders in the cloned repository root: index.html, data/concepts.json, and README.md.
+Commit and push your changes to the repository’s main branch.
+In the repository: Settings → Pages → Source → Deploy from a branch → main → / (root).
+Your prototype will be live at https://<your-username>.github.io/<repository-name>/ within a minute or two.
 
 No server, no database, no API keys, no cost. This is deliberate — it proves the concept without committing budget.
 
