@@ -25,12 +25,11 @@ python3 -m http.server 8000
 ```
 
 ## Deploy to GitHub Pages (5 minutes)
-
-Clone the existing repository that contains the project.
-Copy/replace these files/folders in the cloned repository root: index.html, data/concepts.json, and README.md.
-Commit and push your changes to the repository’s main branch.
-In the repository: Settings → Pages → Source → Deploy from a branch → main → / (root).
-Your prototype will be live at https://<your-username>.github.io/<repository-name>/ within a minute or two.
+  1. Clone the existing repository that contains the project.
+  2. Copy/replace these files/folders in the cloned repository root: `index.html`, `data/concepts.json`, and `README.md`.
+  3. Commit and push your changes to the repository’s main branch.
+  4. In the repository: Settings → Pages → Source → Deploy from a branch → main → / (root).
+  5. Your prototype will be live at `https://<your-username>.github.io/<repository-name>/` within a minute or two.
 
 No server, no database, no API keys, no cost. This is deliberate — it proves the concept without committing budget.
 
