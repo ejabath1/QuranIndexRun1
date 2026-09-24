@@ -1,0 +1,77 @@
+name: Commit Test + AI Review Report
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write   # needed if you want the report committed back to the repo
+
+jobs:
+  test-and-report:
+    runs-on: ubuntu-latest
+    steps:
+      # ── 1. Get the code, with 2 commits of history so we can diff ──
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # ── 2. Capture the before/after diff of this commit ──
+      - name: Generate commit diff
+        run: |
+          git diff HEAD~1 HEAD > commit.diff || git show --format= HEAD > commit.diff
+          echo "=== DIFF SUMMARY ==="
+          git diff --stat HEAD~1 HEAD || true
+        if: github.event_name == 'push'
+
+      # ── 3. Run the test suite (structure + live API tests) ──
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test deps
+        run: pip install requests
+      - name: Run tests against concepts.json and live APIs
+        run: python tests/run_tests.py --json tests/results.json --html tests/report_body.html
+
+      # ── 4. (Optional) FREE AI review of the diff — Google Gemini free tier ──
+      # Get a free key at https://aistudio.google.com/apikey (no credit card)
+      # then add it in: Repo Settings → Secrets → GEMINI_API_KEY
+      - name: Gemini AI review of the commit
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY not set — skipping AI review."
+            exit 0
+          fi
+          python tests/ai_review.py commit.diff tests/ai_review.html
+
+      # ── 5. Build the final PDF report ──
+      - name: Assemble & convert report to PDF
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq wkhtmltopdf
+          python tests/build_report.py
+          ls -lh test-report.pdf
+
+      # ── 6a. Keep the PDF as a downloadable artifact (simple) ──
+      - name: Upload PDF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ github.sha }}
+          path: test-report.pdf
+
+      # ── 6b. (Optional) Commit the report into a /reports folder in the repo ──
+      - name: Commit report to repo
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p reports
+          cp test-report.pdf "reports/test-report-${GITHUB_SHA::7}.pdf"
+          cp tests/report.html "reports/test-report-${GITHUB_SHA::7}.html" 2>/dev/null || true
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/
+          git commit -m "ci: test report for ${GITHUB_SHA::7} [skip ci]" || echo "no changes"
+          git push
