@@ -1,0 +1,9 @@
+on: push
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - run: git diff HEAD~1 HEAD > changes.patch
+      # send changes.patch + files to Claude API → get report → upload as artifact
