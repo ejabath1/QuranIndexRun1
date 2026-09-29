@@ -1,18 +1,11 @@
-name: Fast CI & PDF Test Report
+name: CI Pipeline & PDF Export
 
 on:
   push:
     branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
   pull_request:
     branches: [main, develop]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
+  workflow_dispatch:
 
 concurrency:
   group: \({{ github.workflow }}-\){{ github.ref }}
@@ -22,15 +15,13 @@ permissions:
   contents: read
 
 jobs:
-  fast-test-and-pdf:
-    name: Execute Tests & Generate PDF Report
+  test-and-pdf:
+    name: Execute Tests & Export PDF
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1 # Fast clone for rapid testing
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -41,68 +32,21 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # ---------------------------------------------------------------------------
-      # RUN TESTS & GENERATE HTML REPORT
-      # ---------------------------------------------------------------------------
-      - name: Run Tests with HTML Reporter
-        run: |
-          # Uses jest-html-reporter or standard test html output
-          npm test -- --reporters=default --reporters=jest-html-reporter \
-            --config='{"pageTitle": "Automated Test Report", "outputPath": "test-report.html"}'
-        continue-on-error: true # Ensure PDF is generated even if tests fail
-
-      # ---------------------------------------------------------------------------
-      # CONVERT HTML TEST REPORT TO PDF
-      # ---------------------------------------------------------------------------
-   name: Ultra-Fast CI & PDF Export
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-jobs:
-  test-and-pdf:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install & Run Tests
-        run: |
-          npm ci
-          npm test -- --reporters=default --reporters=jest-html-reporter \
-            --config='{"pageTitle": "Test Report", "outputPath": "test-report.html"}'
+      - name: Run Tests
+        run: npm test
         continue-on-error: true
 
-      # Zero installation step: Runs instantly using Python standard library
-      - name: Convert HTML Report to PDF via Hugging Face Space
+      - name: Convert HTML Report to PDF
         run: |
           python .github/scripts/convert_to_pdf.py \
             "test-report.html" \
             "test-report.pdf" \
-            "https://YOUR-HF-USERNAME-YOUR-SPACE-NAME.hf.space"
+            "https://ejabath-pdfer.hf.space"
 
-      - name: Upload PDF Report
+      - name: Upload PDF Artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: Test-Report-${{ github.sha }}
           path: test-report.pdf
-          retention-days: 7------------------
-      # UPLOAD PDF ARTIFAC
-      # ---------------------------------------------------------------------------
-      - name: Upload PDF Test Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: Test-Report-${{ github.sha }}
-          path: test-report.pdf
-          retention-days: 7 # Keep artifact retention low to reduce storage costs
+          retention-days: 7
